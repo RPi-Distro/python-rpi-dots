@@ -1,6 +1,7 @@
 from RPi import GPIO
 
 GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
 
 num_pins = 28
 
@@ -15,9 +16,13 @@ print()
 for pin, state in pin_states.items():
     print("%2d: %s" % (pin, state))
 
-active = sum(pin_states.values())
-inactive = num_pins - active
+active = [pin for pin, state in pin_states.items() if not state]
+inactive = [pin for pin, state in pin_states.items() if state]
 
 print()
-print("Total active: %i" % inactive)
-print("Total inactive: %i" % active)
+print("Total active: %s" % len(active))
+print("Total inactive: %s" % len(inactive))
+print()
+print("Active pins: %s" % str(active))
+print("Inactive pins: %s" % str(inactive))
+
