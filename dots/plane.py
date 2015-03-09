@@ -26,9 +26,9 @@ SCALE = 1
 WHITE     = (255, 255, 255)
 BLACK     = (  0,   0,   0)
 ORANGE    = (255,  65,   0)
-RED       = (255,  64,  64)
-GREEN     = ( 64, 255,  64)
-BLUE      = ( 64,  64, 255)
+RED       = (204,   0,   0)
+GREEN     = (  0, 153,   0)
+BLUE      = (  0, 128, 255)
 BGCOLOR = WHITE
 
 # 0     left tailfin
