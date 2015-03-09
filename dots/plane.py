@@ -25,7 +25,7 @@ SCALE = 1
 #             R    G    B
 WHITE     = (255, 255, 255)
 BLACK     = (  0,   0,   0)
-CYAN      = (  0, 255, 255)
+ORANGE    = (255,  65,   0)
 RED       = (255,  64,  64)
 GREEN     = ( 64, 255,  64)
 BLUE      = ( 64,  64, 255)
@@ -53,7 +53,7 @@ COLOR_PINS = {
     27: RED,
     10: GREEN,
     0: BLUE,
-    19: CYAN,
+    19: ORANGE,
 }
 
 DOT_PINS = list(set(PINS) - set(COLOR_PINS.items()))
@@ -152,7 +152,7 @@ def ticked2colors(ticked):
         colors = [random.choice(ticked) for i in range(8)]
 
         if len(set(colors)) == len(set(ticked)):     # all colors used
-            colors.append(CYAN)
+            colors.append(ORANGE)
             colors.append(BLACK)
 
             return colors
