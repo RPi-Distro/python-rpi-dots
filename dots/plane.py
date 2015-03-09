@@ -17,9 +17,6 @@ FPS = 5
 WINDOWWIDTH = 780
 WINDOWHEIGHT = 480
 
-# TODO: Rachel, reduce this number to 3, 2 or 1 if things run too slowly
-#       but try not to reduce it to 1, as this makes the lines too thin
-
 SCALE = 1
 
 #             R    G    B
@@ -156,18 +153,6 @@ def ticked2colors(ticked):
             colors.append(BLACK)
 
             return colors
-
-# TODO: Rachel, please populate this function
-#
-# returns:
-#
-# None if not enough dots have been connected (to hide the plane) or
-# a list of the colors that have been selected, as RGB tuples. An empty
-# list indicates that enough dots have been selected, but no colors, in
-# which case the plane will be rendered in white
-#
-# this dummy implementation just uses the "fake" insertion signal from
-# main() which is toggled using the spacebar
 
 def read_hardware(fake):
     if enough_dots_connected():
