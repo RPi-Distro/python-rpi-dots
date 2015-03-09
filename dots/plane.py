@@ -3,6 +3,15 @@ import math
 import random, pygame, sys
 from pygame.locals import *
 from vec2d import *
+from RPi import GPIO
+
+MINIMUM_DOTS_REQUIRED = 2
+
+GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
+
+NUM_PINS = 28
+PINS = list(set(list(range(NUM_PINS))) - set([2, 3]))
 
 FPS = 5
 WINDOWWIDTH = 780
@@ -11,7 +20,7 @@ WINDOWHEIGHT = 480
 # TODO: Rachel, reduce this number to 3, 2 or 1 if things run too slowly
 #       but try not to reduce it to 1, as this makes the lines too thin
 
-SCALE = 4
+SCALE = 1
 
 #             R    G    B
 WHITE     = (255, 255, 255)
@@ -40,6 +49,15 @@ BGCOLOR = WHITE
 # 15    window (always cyan)
 # 16    engine bit (always black)
 
+COLOR_PINS = {
+    27: RED,
+    10: GREEN,
+    0: BLUE,
+    19: CYAN,
+}
+
+DOT_PINS = list(set(PINS) - set(COLOR_PINS.items()))
+
 CMAP = [0, 1, 2, 3, 0, 4, 1, 5, 5, 5, 5, 6, 7, 7, 4, 8, 9]
 
 DATA = [
@@ -64,25 +82,25 @@ DATA = [
 
 def calculate_bezier(p, steps = 30):
     """
-    Calculate a bezier curve from 4 control points and return a 
+    Calculate a bezier curve from 4 control points and return a
     list of the resulting points.
-    
-    The function uses the forward differencing algorithm described here: 
+
+    The function uses the forward differencing algorithm described here:
     http://www.niksula.cs.hut.fi/~hkankaan/Homepages/bezierfast.html
     """
-    
+
     t = 1.0 / steps
     temp = t*t
-    
+
     f = p[0]
     fd = 3 * (p[1] - p[0]) * t
     fdd_per_2 = 3 * (p[0] - 2 * p[1] + p[2]) * temp
     fddd_per_2 = 3 * (3 * (p[1] - p[2]) + p[3] - p[0]) * temp * t
-    
+
     fddd = 2 * fddd_per_2
     fdd = 2 * fdd_per_2
     fddd_per_6 = fddd_per_2 / 3.0
-    
+
     points = []
     for x in range(steps):
         points.append(f)
@@ -104,7 +122,7 @@ def path2points(d):
 
     for p in parse:
         p1 = [float(c) for c in p[1]]
-    
+
         if p[0] == "m":
             x += p1[0]
             y += p1[1]
@@ -115,12 +133,12 @@ def path2points(d):
             points.append((x*SCALE, y*SCALE))
         elif p[0] == "c":
             control_points = [Vec2d(x,y), Vec2d(x+p1[0],y+p1[1]), Vec2d(x+p1[2],y+p1[3]), Vec2d(x+p1[4],y+p1[5])]
-             
+
             bezier = calculate_bezier(control_points, 20)
 
             for i in range(1, len(bezier)):
-                points.append((bezier[i].x*SCALE, bezier[i].y*SCALE))
-            
+                points.append((round(bezier[i].x*SCALE), round(bezier[i].y*SCALE)))
+
             x += p1[4]
             y += p1[5]
 
@@ -129,18 +147,18 @@ def path2points(d):
 def ticked2colors(ticked):
     if len(ticked) == 0:
         ticked.append(WHITE)
-    
-    while True:   
+
+    while True:
         colors = [random.choice(ticked) for i in range(8)]
-        
+
         if len(set(colors)) == len(set(ticked)):     # all colors used
             colors.append(CYAN)
             colors.append(BLACK)
-            
-            return colors   
+
+            return colors
 
 # TODO: Rachel, please populate this function
-# 
+#
 # returns:
 #
 # None if not enough dots have been connected (to hide the plane) or
@@ -152,21 +170,39 @@ def ticked2colors(ticked):
 # main() which is toggled using the spacebar
 
 def read_hardware(fake):
-    if fake:
-        return [RED, GREEN, BLUE]
+    if enough_dots_connected():
+        return get_selected_colors()
     else:
         return None
 
+def gpio_setup(pins):
+    for pin in pins:
+        GPIO.setup(pin, GPIO.IN, GPIO.PUD_OFF)
+
+def get_selected_colors():
+    return [COLOR_PINS[pin] for pin in COLOR_PINS if pin_is_active(pin)]
+
+def enough_dots_connected():
+    active_pins = sum(pin_is_active(pin) for pin in DOT_PINS)
+    return active_pins > MINIMUM_DOTS_REQUIRED
+
+def pin_is_active(pin):
+    GPIO.setup(pin, GPIO.IN, GPIO.PUD_UP)
+    state = GPIO.input(pin)
+    GPIO.setup(pin, GPIO.IN, GPIO.PUD_OFF)
+    return state == 0
+
 def main():
+    gpio_setup(PINS)
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
-    
+
     if SCALE != 1:
         SCALESURF = pygame.Surface((WINDOWWIDTH*SCALE, WINDOWHEIGHT*SCALE), 0, 32)
     else:
-        SCALESURF = DISPLAYSURF        
-        
+        SCALESURF = DISPLAYSURF
+
     pygame.display.set_caption('Is it a bird?')
 
     points = [path2points(d) for d in DATA]
@@ -190,20 +226,20 @@ def main():
 
         hardware = read_hardware(fake)
 
-        if hardware and hardware != last:        
+        if hardware and hardware != last:
             colors = ticked2colors(hardware)
-        
+
         last = hardware
 
         # clear the buffer, render plane if hardware plugged in
-        
+
         SCALESURF.fill(BGCOLOR)
 
         if hardware:
             for j in range(len(DATA)):
                 pygame.draw.polygon(SCALESURF, colors[CMAP[j]], points[j])
                 if SCALE == 1:
-                    pygame.draw.aalines(SCALESURF, BLACK, True, points[j], 1)
+                    pygame.draw.lines(SCALESURF, BLACK, True, points[j], 1)
                 else:
                     pygame.draw.lines(SCALESURF, BLACK, True, points[j], SCALE*2)
 
@@ -212,7 +248,7 @@ def main():
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
-        
+
 def terminate():
     pygame.quit()
     sys.exit()
