@@ -3,12 +3,15 @@ import math
 import random, pygame, sys
 from pygame.locals import *
 from vec2d import *
-from RPi import GPIO
+
+try:
+    from RPi import GPIO
+    print("Select some colours and connect the dots!")
+except ImportError:
+    GPIO = None
+    print("Not running on a Raspberry Pi. Press Space to show and hide the plane.")
 
 MINIMUM_DOTS_REQUIRED = 2
-
-GPIO.setmode(GPIO.BCM)
-GPIO.setwarnings(False)
 
 NUM_PINS = 28
 PINS = list(set(list(range(NUM_PINS))) - set([2, 3]))
@@ -155,12 +158,18 @@ def ticked2colors(ticked):
             return colors
 
 def read_hardware(fake):
-    if enough_dots_connected():
-        return get_selected_colors()
-    else:
-        return None
+    if GPIO:
+        if enough_dots_connected():
+            return get_selected_colors()
+        else:
+            return None
+    elif fake:
+        return [RED, GREEN, BLUE]
 
 def gpio_setup(pins):
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setwarnings(False)
+
     for pin in pins:
         GPIO.setup(pin, GPIO.IN, GPIO.PUD_OFF)
 
@@ -178,7 +187,18 @@ def pin_is_active(pin):
     return state == 0
 
 def main():
-    gpio_setup(PINS)
+    global GPIO
+    if GPIO:
+        try:
+            gpio_setup(PINS)
+            fake = False
+        except RuntimeError:
+            GPIO = None
+            fake = True
+            print("Cannot access GPIO. Try running with sudo.")
+    else:
+        fake = True
+
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
@@ -192,7 +212,6 @@ def main():
 
     points = [path2points(d) for d in DATA]
 
-    fake = False
     last = None
 
     colors = None
