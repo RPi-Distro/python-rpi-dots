@@ -12,7 +12,7 @@ except ImportError:
     GPIO = None
     print("Not running on a Raspberry Pi. Press Space to show and hide the plane.")
 
-MINIMUM_DOTS_REQUIRED = 2
+MINIMUM_DOTS_REQUIRED = 5
 
 NUM_PINS = 28
 PINS = list(set(list(range(NUM_PINS))) - set([2, 3]))
