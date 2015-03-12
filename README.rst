@@ -22,8 +22,6 @@ Python 2::
 Usage
 =====
 
-Usage:
-
 Run from the command line::
 
     sudo rpi_dots
@@ -47,5 +45,5 @@ Open Source
 .. _Eben Upton: https://github.com/ebenupton
 .. _Ben Nuttall: https://github.com/bennuttall
 .. _BSD Licence: http://opensource.org/licenses/BSD-3-Clause
-.. _GitHub Issues: https://github.com/raspberrypilearning/dots
-.. _GitHub: https://github.com/raspberrypilearning/dots/issues
+.. _GitHub: https://github.com/raspberrypilearning/dots
+.. _GitHub Issues: https://github.com/raspberrypilearning/dots/issues
