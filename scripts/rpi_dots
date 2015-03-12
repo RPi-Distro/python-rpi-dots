@@ -1,0 +1,11 @@
+#!/usr/bin/python
+
+import rpi_dots
+
+
+def main():
+    rpi_dots.plane()
+
+
+if __name__ == '__main__':
+    main()
