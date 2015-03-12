@@ -7,7 +7,7 @@ def read(fname):
 
 setup(
     name="rpi_dots",
-    version="0.2.1",
+    version="0.2.2",
     author="Ben Nuttall",
     author_email="ben@raspberrypi.org",
     description="Software for the DOTS board for the Raspberry Pi",

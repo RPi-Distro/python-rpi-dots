@@ -1,8 +1,9 @@
+from __future__ import absolute_import
 import re
 import math
 import random, pygame, sys
 from pygame.locals import *
-from vec2d import *
+from .vec2d import Vec2d
 
 try:
     from RPi import GPIO
