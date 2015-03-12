@@ -22,9 +22,11 @@ Python 2::
 Usage
 =====
 
-Usage::
+Usage:
 
-    ???
+Run from the command line::
+
+    sudo rpi_dots
 
 Contributors
 ============
